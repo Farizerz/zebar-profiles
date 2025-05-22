@@ -66,6 +66,10 @@ body,
   justify-self: end;
 }
 
+.left {
+  padding-top: 1px;
+}
+
 .logo,
 .binding-mode,
 .tiling-direction,
