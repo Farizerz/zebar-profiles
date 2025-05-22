@@ -43,6 +43,8 @@ body,
 
 .container {
   height: 100%;
+  display: flex;
+  gap: 5px;
 }
 
 .left,

@@ -29,6 +29,7 @@
         date: { type: "date", formatting: "EEE, D TT" },
         battery: { type: "battery" },
         memory: { type: "memory" },
+        host: { type: "host" },
       });
 
       createRoot(document.getElementById("root")).render(<App />);
@@ -129,6 +130,7 @@
           <div className="app">
             <div className="container">
               <div className="left">{output.date?.formatted}</div>
+              <div className="left">{output.host?.hostname}</div>
             </div>
             <div className="center">
               {showWinLogo && <i className="logo nf nf-fa-windows"></i>}
