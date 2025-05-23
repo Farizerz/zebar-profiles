@@ -7,11 +7,8 @@
   "resizable": false,
   "transparent": true,
   "caching": {
-    "defaultDuration": 3600,
+    "defaultDuration": 60,
     "rules": []
-  },
-  "privileges": {
-    "shellCommands": []
   },
   "presets": [
     {

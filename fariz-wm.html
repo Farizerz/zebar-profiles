@@ -26,21 +26,58 @@
         network: { type: "network" },
         glazewm: { type: "glazewm" },
         cpu: { type: "cpu" },
-        date: { type: "date", formatting: "EEE, D TT" },
+        date: { type: "date", formatting: "EEE, d MMM TT" },
         battery: { type: "battery" },
         memory: { type: "memory" },
         host: { type: "host" },
+        audio: { type: "audio" },
       });
 
       createRoot(document.getElementById("root")).render(<App />);
 
       function App() {
         const [output, setOutput] = useState(providers.outputMap);
+        const [config, setConfig] = useState(null);
+        const [showPowerButtons, setShowPowerButtons] = useState(false);
         const showWinLogo = false;
 
         useEffect(() => {
           providers.onOutput(() => setOutput(providers.outputMap));
         }, []);
+
+        // Get icon to show volume
+
+        const getVolumeIcon = (volume) => {
+          if (volume > 70) {
+            return (
+              <i
+                className="nf nf-md-volume_high"
+                style={{ color: "#DCDCDC" }}
+              ></i>
+            );
+          } else if (volume > 40) {
+            return (
+              <i
+                className="nf nf-md-volume_medium"
+                style={{ color: "#DCDCDC" }}
+              ></i>
+            );
+          } else if (volume > 0) {
+            return (
+              <i
+                className="nf nf-md-volume_low"
+                style={{ color: "#DCDCDC" }}
+              ></i>
+            );
+          } else {
+            return (
+              <i
+                className="nf nf-md-volume_off"
+                style={{ color: "#808080" }}
+              ></i>
+            );
+          }
+        };
 
         // Get icon to show for current network status.
         function getNetworkIcon(networkOutput) {
@@ -161,88 +198,100 @@
               )}
             </div>
 
-            <div className="right">
-              {output.glazewm && (
-                <>
-                  {output.glazewm.isPaused && (
+            <div className="container end">
+              <div className="right">
+                {output.glazewm && (
+                  <>
+                    {output.glazewm.isPaused && (
+                      <button
+                        className="paused-button"
+                        onClick={() => glazewm.runCommand("wm-toggle-pause")}
+                      >
+                        PAUSED
+                      </button>
+                    )}
+                    {output.glazewm.bindingModes.map((bindingMode) => (
+                      <button
+                        className="binding-mode"
+                        key={bindingMode.name}
+                        onClick={() =>
+                          output.glazewm.runCommand(
+                            `wm-disable-binding-mode --name ${bindingMode.name}`
+                          )
+                        }
+                      >
+                        {bindingMode.displayName ?? bindingMode.name}
+                      </button>
+                    ))}
+
                     <button
-                      className="paused-button"
-                      onClick={() => glazewm.runCommand("wm-toggle-pause")}
-                    >
-                      PAUSED
-                    </button>
-                  )}
-                  {output.glazewm.bindingModes.map((bindingMode) => (
-                    <button
-                      className="binding-mode"
-                      key={bindingMode.name}
+                      className={`tiling-direction nf ${
+                        output.glazewm.tilingDirection === "horizontal"
+                          ? "nf-md-swap_horizontal"
+                          : "nf-md-swap_vertical"
+                      }`}
                       onClick={() =>
-                        output.glazewm.runCommand(
-                          `wm-disable-binding-mode --name ${bindingMode.name}`
-                        )
+                        output.glazewm.runCommand("toggle-tiling-direction")
                       }
-                    >
-                      {bindingMode.displayName ?? bindingMode.name}
-                    </button>
-                  ))}
+                    ></button>
+                  </>
+                )}
 
-                  <button
-                    className={`tiling-direction nf ${
-                      output.glazewm.tilingDirection === "horizontal"
-                        ? "nf-md-swap_horizontal"
-                        : "nf-md-swap_vertical"
-                    }`}
-                    onClick={() =>
-                      output.glazewm.runCommand("toggle-tiling-direction")
-                    }
-                  ></button>
-                </>
-              )}
+                {output.network && (
+                  <div className="network">
+                    {getNetworkIcon(output.network)}
+                    {output.network.defaultGateway?.ssid}
+                  </div>
+                )}
 
-              {output.network && (
-                <div className="network">
-                  {getNetworkIcon(output.network)}
-                  {output.network.defaultGateway?.ssid}
-                </div>
-              )}
+                {output.audio && (
+                  <div className="audio">
+                    {getVolumeIcon(output.audio.defaultPlaybackDevice.volume)}
+                    <span>{output.audio.defaultPlaybackDevice.volume}%</span>
+                  </div>
+                )}
 
-              {output.memory && (
-                <div className="memory">
-                  <i
-                    className="nf nf-fae-chip"
-                    style={{ color: "#DAA520" }}
-                  ></i>
-                  {Math.round(output.memory.usage)}%
-                </div>
-              )}
-
-              {output.cpu && (
-                <div className="cpu">
-                  <i className="nf nf-oct-cpu" style={{ color: "#808080" }}></i>
-
-                  {/* Change the text color if the CPU usage is high. */}
-                  <span className={output.cpu.usage > 85 ? "high-usage" : ""}>
-                    {Math.round(output.cpu.usage)}%
-                  </span>
-                </div>
-              )}
-
-              {output.battery && (
-                <div className="battery">
-                  {/* Show icon for whether battery is charging. */}
-                  {output.battery.isCharging && (
+                {output.memory && (
+                  <div className="memory">
                     <i
-                      className="nf nf-md-lightning_bolt"
-                      style={{
-                        color: "#00FA9A",
-                        position: "absolute",
-                      }}
+                      className="nf nf-fae-chip"
+                      style={{ color: "#DAA520" }}
                     ></i>
-                  )}
-                  {getBatteryIcon(output.battery)}
-                  {Math.round(output.battery.chargePercent)}%
-                </div>
-              )}
+                    {Math.round(output.memory.usage)}%
+                  </div>
+                )}
+
+                {output.cpu && (
+                  <div className="cpu">
+                    <i
+                      className="nf nf-oct-cpu"
+                      style={{ color: "#808080" }}
+                    ></i>
+
+                    {/* Change the text color if the CPU usage is high. */}
+                    <span className={output.cpu.usage > 85 ? "high-usage" : ""}>
+                      {Math.round(output.cpu.usage)}%
+                    </span>
+                  </div>
+                )}
+
+                {output.battery && (
+                  <div className="battery">
+                    {/* Show icon for whether battery is charging. */}
+                    {output.battery.isCharging && (
+                      <i
+                        className="nf nf-md-lightning_bolt"
+                        style={{
+                          color: "#00FA9A",
+                          position: "absolute",
+                        }}
+                      ></i>
+                    )}
+                    {getBatteryIcon(output.battery)}
+                    {Math.round(output.battery.chargePercent)}%
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
