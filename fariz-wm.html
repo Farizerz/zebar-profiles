@@ -26,7 +26,7 @@
         network: { type: "network" },
         glazewm: { type: "glazewm" },
         cpu: { type: "cpu" },
-        date: { type: "date", formatting: "EEE, d MMM TT" },
+        date: { type: "date", formatting: "EEE, MMM d 🌏 HH:mm:ss" },
         battery: { type: "battery" },
         memory: { type: "memory" },
         host: { type: "host" },
@@ -46,35 +46,96 @@
         }, []);
 
         // Get icon to show volume
-
-        const getVolumeIcon = (volume) => {
-          if (volume > 70) {
+        const getIcon = (value, icon, { high, medium, low, lowest }) => {
+          if (value >= 90) {
             return (
-              <i
-                className="nf nf-md-volume_high"
-                style={{ color: "#DCDCDC" }}
-              ></i>
+              <div className="icon">
+                <span style={{ color: high }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
             );
-          } else if (volume > 40) {
+          } else if (value >= 80) {
             return (
-              <i
-                className="nf nf-md-volume_medium"
-                style={{ color: "#DCDCDC" }}
-              ></i>
+              <div className="icon">
+                <span style={{ color: high }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
             );
-          } else if (volume > 0) {
+          } else if (value >= 70) {
             return (
-              <i
-                className="nf nf-md-volume_low"
-                style={{ color: "#DCDCDC" }}
-              ></i>
+              <div className="icon">
+                <span style={{ color: high }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
+            );
+          } else if (value >= 60) {
+            return (
+              <div className="icon">
+                <span style={{ color: high }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
+            );
+          } else if (value >= 50) {
+            return (
+              <div className="icon">
+                <span style={{ color: medium }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
+            );
+          } else if (value >= 40) {
+            return (
+              <div className="icon">
+                <span style={{ color: medium }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
+            );
+          } else if (value >= 30) {
+            return (
+              <div className="icon">
+                <span style={{ color: low }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
+            );
+          } else if (value >= 20) {
+            return (
+              <div className="icon">
+                <span style={{ color: low }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
+            );
+          } else if (value >= 10) {
+            return (
+              <div className="icon">
+                <span style={{ color: low }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
             );
           } else {
             return (
-              <i
-                className="nf nf-md-volume_off"
-                style={{ color: "#808080" }}
-              ></i>
+              <div className="icon">
+                <span style={{ color: lowest }}>
+                  <span style={{ paddingRight: 8 }}>{icon}</span> 
+                </span>
+                <span>{` ${value}%`}</span>
+              </div>
             );
           }
         };
@@ -83,100 +144,75 @@
         function getNetworkIcon(networkOutput) {
           switch (networkOutput.defaultInterface?.type) {
             case "ethernet":
-              return <i className="nf nf-md-ethernet_cable"></i>;
+              return (
+                <span style={{ color: "var(--teal)", paddingRight: 13 }}>
+                  󰈀
+                </span>
+              );
             case "wifi":
               if (networkOutput.defaultGateway?.signalStrength >= 80) {
                 return (
-                  <i
-                    className="nf nf-md-wifi_strength_4"
-                    style={{ color: "#00FA9A" }}
-                  ></i>
+                  <span style={{ color: "var(--teal)", paddingRight: 13 }}>
+                    󰤨
+                  </span>
                 );
               } else if (networkOutput.defaultGateway?.signalStrength >= 65) {
                 return (
-                  <i
-                    className="nf nf-md-wifi_strength_3"
-                    style={{ color: "#3CB371" }}
-                  ></i>
+                  <span style={{ color: "var(--green)", paddingRight: 13 }}>
+                    󰤥
+                  </span>
                 );
               } else if (networkOutput.defaultGateway?.signalStrength >= 40) {
                 return (
-                  <i
-                    className="nf nf-md-wifi_strength_2"
-                    style={{ color: "#FFD700" }}
-                  ></i>
+                  <span style={{ color: "var(--yellow)", paddingRight: 13 }}>
+                    󰤢
+                  </span>
                 );
               } else if (networkOutput.defaultGateway?.signalStrength >= 25) {
                 return (
-                  <i
-                    className="nf nf-md-wifi_strength_1"
-                    style={{ color: "red" }}
-                  ></i>
+                  <span style={{ color: "var(--red)", paddingRight: 13 }}>
+                    󰤟
+                  </span>
                 );
               } else {
                 return (
-                  <i
-                    className="nf nf-md-wifi_strength_outline"
-                    style={{ color: "red" }}
-                  ></i>
+                  <span style={{ color: "var(--red)", paddingRight: 13 }}>
+                    󰤯
+                  </span>
                 );
               }
             default:
               return (
-                <i
-                  className="nf nf-md-wifi_strength_off_outline"
-                  style={{ color: "red" }}
-                ></i>
+                <span style={{ color: "var(--red)", paddingRight: 13 }}>󰤮</span>
               );
           }
-        }
-
-        // Get icon to show for how much of the battery is charged.
-        function getBatteryIcon(batteryOutput) {
-          if (batteryOutput.chargePercent > 90)
-            return (
-              <i
-                className="nf nf-fa-battery_4"
-                style={{ color: "#00FA9A" }}
-              ></i>
-            );
-          if (batteryOutput.chargePercent > 50)
-            return (
-              <i
-                className="nf nf-fa-battery_3"
-                style={{ color: "#3CB371" }}
-              ></i>
-            );
-          if (batteryOutput.chargePercent > 30)
-            return (
-              <i
-                className="nf nf-fa-battery_2"
-                style={{ color: "#FFD700" }}
-              ></i>
-            );
-          if (batteryOutput.chargePercent > 30)
-            return (
-              <i className="nf nf-fa-battery_1" style={{ color: "red" }}></i>
-            );
-          return (
-            <i className="nf nf-fa-battery_0" style={{ color: "red" }}></i>
-          );
         }
 
         return (
           <div className="app">
             <div className="container">
               <div className="left">{output.date?.formatted}</div>
-              <div className="left">{output.host?.hostname}</div>
+              <div className="left">
+                {" "}
+                <img
+                  src={"./fariz-wm/logo.png"}
+                  width={18}
+                  height={18}
+                  style={{ marginRight: 8 }}
+                />
+                {output.host?.hostname}
+              </div>
+              {output.network && (
+                <div className="left">
+                  {getNetworkIcon(output.network)}
+                  {output.network.defaultInterface?.type === "ethernet"
+                    ? "Ethernet"
+                    : output.network.defaultGateway?.ssid || "No Internet"}
+                </div>
+              )}
             </div>
             <div className="center">
               {showWinLogo && <i className="logo nf nf-fa-windows"></i>}
-              <img
-                src={"./fariz-wm/logo.png"}
-                width={18}
-                height={18}
-                style={{ marginRight: 20, marginLeft: 4 }}
-              />
               {output.glazewm && (
                 <div className="workspaces">
                   {output.glazewm.currentWorkspaces.map((workspace) => (
@@ -225,72 +261,61 @@
                     ))}
 
                     <button
-                      className={`tiling-direction nf ${
-                        output.glazewm.tilingDirection === "horizontal"
-                          ? "nf-md-swap_horizontal"
-                          : "nf-md-swap_vertical"
-                      }`}
+                      className="tiling-direction"
                       onClick={() =>
                         output.glazewm.runCommand("toggle-tiling-direction")
                       }
-                    ></button>
+                    >
+                      {output.glazewm.tilingDirection === "horizontal"
+                        ? "󰓡"
+                        : "󰓢"}
+                    </button>
                   </>
                 )}
 
-                {output.network && (
-                  <div className="network">
-                    {getNetworkIcon(output.network)}
-                    {output.network.defaultGateway?.ssid}
-                  </div>
-                )}
+                {output.audio &&
+                  getIcon(output.audio.defaultPlaybackDevice.volume, "", {
+                    high: "var(--subtext1)",
+                    medium: "var(--subtext1)",
+                    low: "var(--subtext1)",
+                    lowest: "var(--overlay1)",
+                  })}
 
-                {output.audio && (
-                  <div className="audio">
-                    {getVolumeIcon(output.audio.defaultPlaybackDevice.volume)}
-                    <span>{output.audio.defaultPlaybackDevice.volume}%</span>
-                  </div>
-                )}
+                {output.memory &&
+                  getIcon(Math.round(output.memory.usage), "", {
+                    high: "var(--red)",
+                    medium: "var(--peach)",
+                    low: "var(--peach)",
+                    lowest: "var(--peach)",
+                  })}
 
-                {output.memory && (
-                  <div className="memory">
-                    <i
-                      className="nf nf-fae-chip"
-                      style={{ color: "#DAA520" }}
-                    ></i>
-                    {Math.round(output.memory.usage)}%
-                  </div>
-                )}
+                {output.cpu &&
+                  getIcon(Math.round(output.cpu.usage), "", {
+                    high: "var(--red)",
+                    medium: "var(--blue)",
+                    low: "var(--blue)",
+                    lowest: "var(--blue)",
+                  })}
 
-                {output.cpu && (
-                  <div className="cpu">
-                    <i
-                      className="nf nf-oct-cpu"
-                      style={{ color: "#808080" }}
-                    ></i>
-
-                    {/* Change the text color if the CPU usage is high. */}
-                    <span className={output.cpu.usage > 85 ? "high-usage" : ""}>
-                      {Math.round(output.cpu.usage)}%
-                    </span>
-                  </div>
-                )}
-
-                {output.battery && (
-                  <div className="battery">
-                    {/* Show icon for whether battery is charging. */}
-                    {output.battery.isCharging && (
-                      <i
-                        className="nf nf-md-lightning_bolt"
-                        style={{
-                          color: "#00FA9A",
-                          position: "absolute",
-                        }}
-                      ></i>
-                    )}
-                    {getBatteryIcon(output.battery)}
-                    {Math.round(output.battery.chargePercent)}%
-                  </div>
-                )}
+                {output.battery &&
+                  getIcon(
+                    Math.round(output.battery.chargePercent),
+                    output.battery.isCharging ? "󱐋" : "󰁹",
+                    {
+                      high: output.battery.isCharging
+                        ? "var(--teal)"
+                        : "var(--green)",
+                      medium: output.battery.isCharging
+                        ? "var(--teal)"
+                        : "var(--yellow)",
+                      low: output.battery.isCharging
+                        ? "var(--teal)"
+                        : "var(--red)",
+                      lowest: output.battery.isCharging
+                        ? "var(--teal)"
+                        : "var(--red)",
+                    }
+                  )}
               </div>
             </div>
           </div>
