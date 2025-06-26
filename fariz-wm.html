@@ -46,6 +46,14 @@
           providers.onOutput(() => setOutput(providers.outputMap));
         }, []);
 
+        const milisecondToHours = (value) => {
+          const totalMinutes = Math.floor(value / 60000);
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
+
+          return { hours, minutes };
+        };
+
         // Get icon to show volume
         const getIcon = (
           value,
@@ -362,8 +370,17 @@
                         : "var(--red)",
                     },
                     output.battery.isCharging
-                      ? output.battery.timeTillFull
-                      : output.battery.timeTillEmpty
+                      ? `Time until full: ${
+                          milisecondToHours(output.battery.timeTillFull).hours
+                        }h ${
+                          milisecondToHours(output.battery.timeTillFull).minutes
+                        }min`
+                      : `Time remaining: ${
+                          milisecondToHours(output.battery.timeTillEmpty).hours
+                        }h ${
+                          milisecondToHours(output.battery.timeTillEmpty)
+                            .minutes
+                        }min`
                   )}
               </div>
             </div>
