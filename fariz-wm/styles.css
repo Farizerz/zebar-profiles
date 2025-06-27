@@ -45,7 +45,7 @@ body {
   color: var(--text);
   font-family: "JetBrainsMono Nerd Font";
   font-size: 12px;
-  font-weight: 600px;
+  font-weight: 600;
   overflow: hidden;
 }
 
@@ -115,6 +115,14 @@ body,
 
 .left {
   padding-top: 1px;
+}
+
+.media {
+  background-color: transparent;
+  font-size: 10px;
+  cursor: pointer;
+  text-shadow: 1px 1.5px 1px var(--surface0);
+  margin-right: -300px;
 }
 
 .logo,

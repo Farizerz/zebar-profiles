@@ -23,14 +23,15 @@
       import * as zebar from "https://esm.sh/zebar@2";
 
       const providers = zebar.createProviderGroup({
-        network: { type: "network" },
+        network: { type: "network", refreshInterval: 2000 },
         glazewm: { type: "glazewm" },
-        cpu: { type: "cpu" },
+        cpu: { type: "cpu", refreshInterval: 2000 },
         date: { type: "date", formatting: "EEE, MMM d 🌏 HH:mm:ss" },
-        battery: { type: "battery" },
-        memory: { type: "memory" },
+        battery: { type: "battery", refreshInterval: 2000 },
+        memory: { type: "memory", refreshInterval: 2000 },
         host: { type: "host" },
         audio: { type: "audio" },
+        media: { type: "media" },
       });
 
       createRoot(document.getElementById("root")).render(<App />);
@@ -46,10 +47,15 @@
         }, []);
 
         // Get icon to show volume
-        const getIcon = (value, icon, { high, medium, low, lowest }) => {
+        const getIcon = (
+          value,
+          icon,
+          { high, medium, low, lowest },
+          tooltip
+        ) => {
           if (value >= 90) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: high }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -58,7 +64,7 @@
             );
           } else if (value >= 80) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: high }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -67,7 +73,7 @@
             );
           } else if (value >= 70) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: high }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -76,7 +82,7 @@
             );
           } else if (value >= 60) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: high }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -85,7 +91,7 @@
             );
           } else if (value >= 50) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: medium }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -94,7 +100,7 @@
             );
           } else if (value >= 40) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: medium }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -103,7 +109,7 @@
             );
           } else if (value >= 30) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: low }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -112,7 +118,7 @@
             );
           } else if (value >= 20) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: low }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -121,7 +127,7 @@
             );
           } else if (value >= 10) {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: low }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -130,7 +136,7 @@
             );
           } else {
             return (
-              <div className="icon">
+              <div className="icon" title={tooltip ?? ""}>
                 <span style={{ color: lowest }}>
                   <span style={{ paddingRight: 8 }}>{icon}</span> 
                 </span>
@@ -210,6 +216,36 @@
                     : output.network.defaultGateway?.ssid || "No Internet"}
                 </div>
               )}
+              {output.media && (
+                <span
+                  className="left media"
+                  style={{
+                    fontStyle: output.media?.currentSession?.isPlaying
+                      ? ""
+                      : "italic",
+                  }}
+                >
+                  <a onClick={() => output.media?.togglePlayPause()}>
+                    {(() => {
+                      const isPlaying = output.media?.currentSession?.isPlaying;
+                      const artist = output.media?.currentSession?.artist ?? "";
+                      const title = output.media?.currentSession?.title ?? "";
+                      const media = `${
+                        isPlaying && title
+                          ? "󰎇  "
+                          : !isPlaying && title
+                          ? "󰏤  "
+                          : ""
+                      }${artist ? `${artist} - ` : ""}${title}`;
+                      const sliced = media.slice(0, 60);
+                      const adjustedMedia =
+                        media.length > 60 ? `${sliced}...` : media;
+
+                      return adjustedMedia;
+                    })()}
+                  </a>
+                </span>
+              )}
             </div>
             <div className="center">
               {showWinLogo && <i className="logo nf nf-fa-windows"></i>}
@@ -282,12 +318,22 @@
                   })}
 
                 {output.memory &&
-                  getIcon(Math.round(output.memory.usage), "", {
-                    high: "var(--red)",
-                    medium: "var(--peach)",
-                    low: "var(--peach)",
-                    lowest: "var(--peach)",
-                  })}
+                  getIcon(
+                    Math.round(output.memory.usage),
+                    "",
+                    {
+                      high: "var(--red)",
+                      medium: "var(--peach)",
+                      low: "var(--peach)",
+                      lowest: "var(--peach)",
+                    },
+                    `${(output.memory.usedMemory / 1024 ** 3).toFixed(
+                      1
+                    )}GB used / ${(
+                      output.memory.totalMemory /
+                      1024 ** 3
+                    ).toFixed(1)}GB total (${Math.round(output.memory.usage)})%`
+                  )}
 
                 {output.cpu &&
                   getIcon(Math.round(output.cpu.usage), "", {
@@ -314,7 +360,10 @@
                       lowest: output.battery.isCharging
                         ? "var(--teal)"
                         : "var(--red)",
-                    }
+                    },
+                    output.battery.isCharging
+                      ? output.battery.timeTillFull
+                      : output.battery.timeTillEmpty
                   )}
               </div>
             </div>
